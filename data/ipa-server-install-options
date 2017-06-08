@@ -1,0 +1,7 @@
+--realm=EXAMPLE.ORG
+--hostname=dev.example.org
+--mkhomedir
+--domain=EXAMPLE.ORG
+--ip-address=172.21.0.2/16
+--ds-password=admin123
+--admin-password=admin123

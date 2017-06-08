@@ -3,8 +3,45 @@ version: '2'
 networks:
   prodnetwork:
     driver: bridge
+    ipam:
+     config:
+       - subnet: 172.21.0.0/16
+         gateway: 172.21.0.1
 
 services:
+ freeipa:
+  image: freeipa/freeipa-server
+  hostname: dev.example.org
+  domainname: example.org
+  networks:
+   - prodnetwork
+  volumes:
+   - /var/docker-data/lib/ipa-server-data:/data:Z
+   - ./data/ipa-server-install-options:/data/ipa-server-install-options:Z
+  container_name: freeipa-server
+  environment: 
+   - IPA_SERVER_IP="172.21.0.2/16"
+   - IPA_SERVER_HOSTNAME="dev.example.org"
+  tmpfs:
+   /run
+   /tmp
+  privileged: true
+  ports:
+   - 53:53/udp
+   - 53:53/tcp
+   - 80:80/tcp
+   - 443:443/tcp
+   - 389:389/tcp
+   - 636:636/tcp
+    -88:88/tcp
+   - 464:464/tcp
+   - 88:88/udp
+   - 464:464/udp
+   - 123:123/udp
+   - 7389:7389/tcp
+   - 9443:9443/tcp
+   - 9444:9444/tcp
+   - 9445:9445/tcp
  nexus:
   build: ./nexus
   ports:
@@ -13,7 +50,7 @@ services:
     - prodnetwork
 
  jenkins:
-  build: ./jenkins
+  image: jenkinsci/jenkins:lts
   ports:
     - "18080:8080"
   networks:
@@ -21,10 +58,10 @@ services:
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
     - /usr/local/bin/docker:/usr/bin/docker
-    - /opt/jenkins/:/var/lib/jenkins/
+    - /opt/jenkins/:/var/docker-data/lib/jenkins/
   depends_on:
+    - freeipa
     - nexus
-    - gitlab
     - sonar
   environment:
     - NEXUS_PORT=8081
@@ -52,22 +89,6 @@ services:
    - POSTGRES_USER=sonar
    - POSTGRES_PASSWORD=sonar
   volumes:
-    - /opt/postgres/data:/var/lib/postgresql/data
+    - /opt/postgres/data:/var/docker-data/lib/postgresql/data
 
- gitlab:
-  image: gitlab/gitlab-ce:8.14.4-ce.0
-  restart: always
-  networks:
-    - prodnetwork
-  environment:
-    GITLAB_OMNIBUS_CONFIG: |
-      # external_url 'https://gitlab.example.com'
-      # Add any other gitlab.rb configuration here, each on its own line
-  ports:
-    - "80:80"
-    - "443:443"
-    - "2222:22"
-  volumes:
-    - /opt/gitlab/config:/etc/gitlab
-    - /opt/gitlab/logs:/var/log/gitlab
-    - /opt/gitlab/data:/var/opt/gitlab
+ 
