@@ -10,14 +10,17 @@ networks:
 
 services:
  freeipa:
+  build:
+   context: ./freeipa
+   dockerfile: Dockerfile
   image: freeipa/freeipa-server
   hostname: dev.example.org
-  domainname: example.org
   networks:
    - prodnetwork
   volumes:
    - /var/docker-data/lib/ipa-server-data:/data:Z
-   - ./data/ipa-server-install-options:/data/ipa-server-install-options:Z
+   - ./freeipa/ipa-server-install-options:/data/ipa-server-install-options:Z
+   - /sys/fs/cgroup:/sys/fs/cgroup:ro
   container_name: freeipa-server
   environment: 
    - IPA_SERVER_IP="172.21.0.2/16"

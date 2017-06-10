@@ -3,5 +3,5 @@
 --mkhomedir
 --domain=EXAMPLE.ORG
 --ip-address=172.21.0.2/16
---ds-password=admin123
---admin-password=admin123
+--ds-password=admin123as
+--admin-password=admin123as
