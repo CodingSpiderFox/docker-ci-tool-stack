@@ -28,7 +28,7 @@ mkdir -p /var/docker-data/freeipa-server
 
 docker run --name freeipa-server-container -ti \
    --net pgestreamInfrastructure \
-   -h ipa.example.test \
+   -h $IPA_SERVER_NAME \
    -e IPA_SERVER_IP=10.0.0.1 \
    -p 53:53/udp -p 53:53 \
    -p 80:80 -p 443:443 -p 389:389 -p 636:636 -p 88:88 -p 464:464 \
@@ -38,7 +38,7 @@ docker run --name freeipa-server-container -ti \
    --tmpfs /run --tmpfs /tmp \
    --cap-add SYS_ADMIN \
    -v /var/docker-data/ipa-server:/data:Z freeipa/freeipa-server \
-   --realm=EXAMPLE.TEST \
-   --ds-password=password123123 \
-   --admin-password=adminPassword123 \
+   --realm=$REALM \
+   --ds-password=$DS_PASSWORD \
+   --admin-password=$ADMIN_PASSWORD \
    --unattended
