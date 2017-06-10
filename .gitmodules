@@ -1,0 +1,3 @@
+[submodule "freeipa"]
+	path = freeipa
+	url = https://github.com/freeipa/freeipa-container
