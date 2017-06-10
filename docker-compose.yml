@@ -1,69 +1,28 @@
 version: '2'
 
 networks:
-  prodnetwork:
-    driver: bridge
-    ipam:
-     config:
-       - subnet: 172.21.0.0/16
-         gateway: 172.21.0.1
+  internal:
+    external: true
 
 services:
- freeipa:
-  build:
-   context: ./freeipa
-   dockerfile: Dockerfile
-  image: freeipa/freeipa-server
-  hostname: dev.example.org
-  networks:
-   - prodnetwork
-  volumes:
-   - /var/docker-data/lib/ipa-server-data:/data:Z
-   - ./freeipa/ipa-server-install-options:/data/ipa-server-install-options:Z
-   - /sys/fs/cgroup:/sys/fs/cgroup:ro
-  container_name: freeipa-server
-  environment: 
-   - IPA_SERVER_IP="172.21.0.2/16"
-   - IPA_SERVER_HOSTNAME="dev.example.org"
-  tmpfs:
-   /run
-   /tmp
-  privileged: true
-  ports:
-   - 53:53/udp
-   - 53:53/tcp
-   - 80:80/tcp
-   - 443:443/tcp
-   - 389:389/tcp
-   - 636:636/tcp
-    -88:88/tcp
-   - 464:464/tcp
-   - 88:88/udp
-   - 464:464/udp
-   - 123:123/udp
-   - 7389:7389/tcp
-   - 9443:9443/tcp
-   - 9444:9444/tcp
-   - 9445:9445/tcp
  nexus:
   build: ./nexus
   ports:
     - "18081:8081"
   networks:
-    - prodnetwork
+    - pgestreamInfrastructure
 
  jenkins:
   image: jenkinsci/jenkins:lts
   ports:
     - "18080:8080"
   networks:
-    - prodnetwork
+    - pgestreamInfrastructure
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
     - /usr/local/bin/docker:/usr/bin/docker
-    - /opt/jenkins/:/var/docker-data/lib/jenkins/
+    - /var/docker-data/jenkins/:/var/docker-data/lib/jenkins/
   depends_on:
-    - freeipa
     - nexus
     - sonar
   environment:
@@ -77,7 +36,7 @@ services:
    - "19000:9000"
    - "5432:5432"
   networks:
-    - prodnetwork
+    - pgestreamInfrastructure
   depends_on:
     - sonardb
   environment:
@@ -86,12 +45,12 @@ services:
    - SONARQUBE_JDBC_PASSWORD=sonar
  sonardb:
   networks:
-    - prodnetwork
+    - pgestreamInfrastructure
   image: postgres
   environment:
    - POSTGRES_USER=sonar
    - POSTGRES_PASSWORD=sonar
   volumes:
-    - /opt/postgres/data:/var/docker-data/lib/postgresql/data
+    - /var/docker-data/sonar-db/postgres/data:/var/docker-data/lib/postgresql/data
 
  

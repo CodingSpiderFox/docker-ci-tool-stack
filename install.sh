@@ -1,0 +1,1 @@
+./freeippa-server/install.sh
