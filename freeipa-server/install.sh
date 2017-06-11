@@ -19,15 +19,15 @@ if [[ $ANSWER != "y" ]]; then
     exit -1
 fi
 
-if docker network inspect pgestreamInfrastructure 2>&1 | grep -q 'No such network'; then
-  echo "docker network pgestreamInfrastructure not existing. Creating ..."
-  docker network create pgestreamInfrastructure
+if docker network inspect dockercitoolstack_prodnetwork 2>&1 | grep -q 'No such network'; then
+  echo "docker network dockercitoolstack_prodnetwork not existing. Creating ..."
+  docker network create dockercitoolstack_prodnetwork
 fi
 
 mkdir -p /var/docker-data/freeipa-server
 
 docker run --name freeipa-server-container -ti \
-   --net pgestreamInfrastructure \
+   --net dockercitoolstack_prodnetwork \
    -h $IPA_SERVER_NAME \
    -e IPA_SERVER_IP=10.0.0.1 \
    -p 53:53/udp -p 53:53 \

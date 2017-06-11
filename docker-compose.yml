@@ -1,8 +1,8 @@
 version: '2'
 
 networks:
-  internal:
-    external: true
+  prodnetwork:
+    driver: bridge
 
 services:
  nexus:
@@ -10,18 +10,18 @@ services:
   ports:
     - "18081:8081"
   networks:
-    - pgestreamInfrastructure
+    - prodnetwork
 
  jenkins:
   image: jenkinsci/jenkins:lts
   ports:
     - "18080:8080"
   networks:
-    - pgestreamInfrastructure
+    - prodnetwork
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
     - /usr/local/bin/docker:/usr/bin/docker
-    - /var/docker-data/jenkins/:/var/docker-data/lib/jenkins/
+    - /var/docker-data/jenkins/:/var/lib/jenkins/
   depends_on:
     - nexus
     - sonar
@@ -36,7 +36,7 @@ services:
    - "19000:9000"
    - "5432:5432"
   networks:
-    - pgestreamInfrastructure
+    - prodnetwork
   depends_on:
     - sonardb
   environment:
@@ -45,12 +45,23 @@ services:
    - SONARQUBE_JDBC_PASSWORD=sonar
  sonardb:
   networks:
-    - pgestreamInfrastructure
+    - prodnetwork
   image: postgres
   environment:
    - POSTGRES_USER=sonar
    - POSTGRES_PASSWORD=sonar
   volumes:
-    - /var/docker-data/sonar-db/postgres/data:/var/docker-data/lib/postgresql/data
+    - /var/docker-data/postgres/data:/var/lib/postgresql/data
 
- 
+ artifactory:
+   image: docker.bintray.io/jfrog/artifactory-oss:5.3.2
+   container_name: artifactory
+   networks: 
+     - prodnetwork
+   ports:
+    - 8082:8081
+   volumes:
+    - /var/docker-data/artifactory:/var/opt/jfrog/artifactory
+   environment:
+     - EXTRA_JAVA_OPTIONS=-Xmx4g
+   restart: always
